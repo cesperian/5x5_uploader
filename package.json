@@ -1,0 +1,23 @@
+{
+  "name": "5x5_uploader",
+  "version": "1.0.0",
+  "description": "A non-jQuery file uploader written in a functional programming style, uses Materialize for layout and alerts.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cesperian/5x5_uploader.git"
+  },
+  "keywords": [
+    "file-upload",
+    "materialize-css"
+  ],
+  "author": "Chris Esperian",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cesperian/5x5_uploader/issues"
+  },
+  "homepage": "https://github.com/cesperian/5x5_uploader#readme"
+}
