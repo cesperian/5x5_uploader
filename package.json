@@ -4,7 +4,7 @@
   "description": "A non-jQuery file uploader written in a functional programming style, uses Materialize for layout and alerts.",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "webpack --watch"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,17 @@
   "bugs": {
     "url": "https://github.com/cesperian/5x5_uploader/issues"
   },
-  "homepage": "https://github.com/cesperian/5x5_uploader#readme"
+  "homepage": "https://github.com/cesperian/5x5_uploader#readme",
+  "dependencies": {
+    "hyperscript": "^2.0.2",
+    "hyperscript-helpers": "^3.0.3",
+    "materialize-css": "^1.0.0-rc.2"
+  },
+  "devDependencies": {
+    "apply-loader": "^2.0.0",
+    "css-loader": "^3.5.3",
+    "node-sass": "^4.14.1",
+    "sass-loader": "^8.0.2",
+    "style-loader": "^1.2.1"
+  }
 }
