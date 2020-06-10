@@ -1,9 +1,16 @@
 
 import 'materialize-css/dist/css/materialize.css';
 import 'materialize-css/dist/js/materialize.js';
+import { diff, patch } from 'virtual-dom';
+import createElement from 'virtual-dom/create-element';
+
 
 import view from './hsDom';
 import './ul.scss';
+
+const axios = require('axios').default;
+const querystring = require('querystring');
+
 
 (function(){
 
@@ -15,31 +22,78 @@ import './ul.scss';
         fileLimit:5,
         selectOpts:null,
         showDescription:false,
-        // postFn:$.noop,
         files: [],
-        sizeAlert: {
-            show: false,
-            name: null,
-            size: null
-        },
-        numberAlert: false
+        alertMessages: [],
+        isSubmitting: false,
+        submitProgress: 0,
     };
 
-    function updateModel(msg, model, e) {
-        model.numberAlert = model.sizeAlert.show = false;
+    function updateModel(msg, model, e, dispatch) {
+        model.alertMessages = [];
         switch (msg) {
             case 'manualSelect': return queueFiles(e.srcElement.files, model);
             case 'remove': return removeFile(model, e);
-            case 'submit': return submitFiles(model);
             case 'dropfile': return queueFiles(e.dataTransfer.files, model);
             case 'updateDesc': return updateDesc(model, e);
             case 'updateType': return updateType(model, e);
+
+            case 'submit': return submitFiles(model, dispatch);
+            case 'submitSuccess': return submitSuccess(model);
+            case 'submitError': return submitError(model, e);
+            case 'uploadProgress': return model;
             default: return model;
         }
     }
 
+    function submitError(model, e){
+        model.alertMessages.push('File upload failed');
+        model.alertMessages.push(e);
+        model.isSubmitting = false;
+        model.submitProgress = 0;
+        return model;
+    }
+
+    function submitSuccess(model){
+        model.alertMessages.push(`File${model.files.length > 1 ? 's' : ''} successfully uploaded`);
+        model.files = [];
+        model.isSubmitting = false;
+        model.submitProgress = 0;
+        return model;
+    }
+
+    function submitFiles(model, dispatch) {
+        model.isSubmitting = true;
+        let fd = new FormData();
+        model.files.forEach(f => {
+            fd.append("file", f);
+        });
+        axios({
+            method: 'post',
+            url: model.destination,
+            params: model.destinationParams,
+            paramsSerializer: (params) => querystring.stringify(params),
+            headers: {'Content-Type': 'multipart/form-data'},
+            data: fd,
+            onUploadProgress: (e) => {
+                // console.log('prog',e);
+                let pos = e.loaded || e.position;
+                if (e.lengthComputable){
+                    model.submitProgress = Math.ceil(pos / e.total * 100 );
+                    dispatch('uploadProgress');
+                }
+            }
+        })
+        .then(r => {
+            dispatch('submitSuccess');
+        })
+        .catch(e => {
+            dispatch('submitError', e)
+        });
+        return model;
+    }
+
     function updateType(model, e){
-        console.log('selCh', e);
+        // console.log('selCh', e);
         const name = e.target.attributes['name'].value;
         const val = e.target.value;
         model.files.map(f => {
@@ -66,15 +120,14 @@ import './ul.scss';
 
     function queueFiles(fl, model) {
         if (model.files.length == model.fileLimit || model.fileLimit < model.files.length + fl.length) {
-            model.numberAlert = true;
+            model.alertMessages.push(`The limit for the number of file uploads is ${model.fileLimit}`);
             return model;
         }
         for (let i =0; i < fl.length; i++) {
-            console.log('sizeFl', fl[i]);
+            // console.log('sizeFl', fl[i]);
             if (fl[i].size > (model.sizeLimit * 1048576)) {
-                model.sizeAlert.show = true;
-                model.sizeAlert.name = fl[i].name;
-                model.sizeAlert.size = fl[i].size;
+                model.alertMessages.push(`The size limit for individual files is ${model.sizeLimit} MB.`);
+                model.alertMessages.push(`${fl[i].name} is ${(fl[i].size/1048576).toFixed(1)} MB`);
                 return model;
             }else{
                 model.files.push(fl[i]);
@@ -95,15 +148,19 @@ import './ul.scss';
         // send dispatch as arg so can be specified in events created in view fn..
         // for initial view..
         let currentView = view(dispatch, model);
-        node.appendChild(currentView);
+        let rootNode = createElement(currentView);
+        node.appendChild(rootNode);
+        // node.appendChild(currentView);
 
         // ...and updated view (dispatch nested here to isolate side effects) ...
         function dispatch(msg, e) {
-            model = updateModel(msg, model, e);
-            console.log('dispatch model', model);
+            model = updateModel(msg, model, e, dispatch);
+            // console.log('dispatch model', model);
             // console.log('dispatch e', e);
             const updatedView = view(dispatch, model);
-            node.replaceChild(updatedView, currentView);
+            const patches = diff(currentView, updatedView);
+            rootNode = patch(rootNode, patches);
+            // node.replaceChild(updatedView, currentView);
             currentView = updatedView;
         }
     }

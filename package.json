@@ -21,9 +21,11 @@
   },
   "homepage": "https://github.com/cesperian/5x5_uploader#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "hyperscript": "^2.0.2",
     "hyperscript-helpers": "^3.0.3",
-    "materialize-css": "^1.0.0-rc.2"
+    "materialize-css": "^1.0.0-rc.2",
+    "virtual-dom": "^2.1.1"
   },
   "devDependencies": {
     "apply-loader": "^2.0.0",

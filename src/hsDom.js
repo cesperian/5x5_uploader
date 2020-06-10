@@ -1,11 +1,12 @@
 import hh from 'hyperscript-helpers';
-import h from 'hyperscript';
+// import h from 'hyperscript';
+import { h } from 'virtual-dom';
 
 const {div, span, img, label, input, select, option, br, button, p, b} = hh(h);
 
 export default function ddDom(dispatch, model){
 
-    if(model.numberAlert || model.sizeAlert.show) {
+    if(model.alertMessages.length) {
         setTimeout(() => {
             const el = document.querySelector('#modal1');
             const modal = M.Modal.init(el);
@@ -14,36 +15,37 @@ export default function ddDom(dispatch, model){
     }
 
     return div('#uploaderCont', [
-        ddCont(dispatch),
-        queueCont(dispatch, model),
-        submitCont(dispatch, model),
-        div('#modal1.modal', [
-            div('.modal-content', [
-                p(model.numberAlert ? `
-                    The limit for the number of file uploads is ${model.fileLimit}
-                ` : `
-                    The size limit for individual files is ${model.sizeLimit} MB.
-                `),
-                () => {
-                    if (!model.numberAlert) {
-                        return p([
-                            b(model.sizeAlert.name),
-                            ` is ${(model.sizeAlert.size/1048576).toFixed(1)} MB`
-                            ]);
-                    } else {
-                        return br();
-                    }
-                }
-            ]),
-            div('.modal-footer', [
-                button('.modal-close.waves-effect.waves-green.btn-flat', 'Close')
+        // progressCont(model),
+        ddCont(dispatch, model),
+        // queueCont(dispatch, model),
+        // submitCont(dispatch, model),
+        // modal(model)
+    ]);
+}
+
+function progressCont(model) {
+    return div('#progress.container', {style: `display:${model.isSubmitting ? 'block':'none'}`}, [
+        div('.row', [
+            div('.col.s12',[
+                div('.progress', [
+                    div('.determinate', {style: `width:${model.submitProgress}%`})
+                ])
             ])
         ])
     ]);
 }
 
-function ddCont(dispatch){
-    return div('#ddArea.container', [
+function modal(model){
+    return div('#modal1.modal', [
+        div('.modal-content', model.alertMessages.map(m => p(m))),
+        div('.modal-footer', [
+            button('.modal-close.waves-effect.waves-green.btn-flat', 'Close')
+        ])
+    ]);
+}
+
+function ddCont(dispatch, model){
+    return div('#ddArea.container', {style: `opacity:${model.isSubmitting ? '0':'100'}`}, [
         div('.row.ddHandler', [
             div('#dragandrophandler.col.s12.valign-wrapper', {
                 ondragenter: (e) => {
@@ -63,13 +65,13 @@ function ddCont(dispatch){
                 },
             }, [
                 span('.material-icons.uploadIco', 'cloud_upload'),
-                span('Drag files here or', [
-                    label('browse for files',[
+                span({},'Drag files here or', [
+                    label({}, 'browse for files', [
                         input(
                             {
                                 value: 'browse',
                                 type: 'file',
-                                style: 'display:none',
+                                // style: 'display:none',
                                 multiple: true,
                                 onchange: (e)=> dispatch('manualSelect', e)
                             }
@@ -136,14 +138,14 @@ function buildFileTypeOpts(model, file) {
 }
 
 function queueCont(dispatch, model) {
-    console.log('queuecont model', model);
-    return div('#queue.container', model.files.map( file =>
+    // console.log('queuecont model', model);
+    return div('#queue.container', {style: `display:${!model.isSubmitting ? 'block':'none'}`},model.files.map( file =>
             div('.row', buildQueueCols(model, file, dispatch))
         ));
 } // queueCont
 
 function submitCont(dispatch, model) {
-    const submitDom = div('#submit.container', [
+    const submitDom = div('#submit.container', {style: `display:${!model.isSubmitting ? 'block':'none'}`},[
         div('.row', [
             div('.col.s12.right-align', [
                 button(

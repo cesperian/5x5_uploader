@@ -26,6 +26,16 @@
 #uploader{ // root node
 
   #config{display: none;}
+
+  #progress.container{
+    position: relative;
+    .col{
+      position: absolute;
+      top: 88px;
+      .determinate{transition: width 250ms;}
+    }
+  }
+
   #ddArea.container{
 
     #dragandrophandler.col{
