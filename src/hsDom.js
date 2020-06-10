@@ -1,5 +1,4 @@
 import hh from 'hyperscript-helpers';
-// import h from 'hyperscript';
 import { h } from 'virtual-dom';
 
 const {div, span, img, label, input, select, option, br, button, p, b} = hh(h);
@@ -15,11 +14,11 @@ export default function ddDom(dispatch, model){
     }
 
     return div('#uploaderCont', [
-        // progressCont(model),
+        progressCont(model),
         ddCont(dispatch, model),
-        // queueCont(dispatch, model),
-        // submitCont(dispatch, model),
-        // modal(model)
+        queueCont(dispatch, model),
+        submitCont(dispatch, model),
+        modal(model)
     ]);
 }
 
@@ -61,17 +60,19 @@ function ddCont(dispatch, model){
                 ondrop: (e) => {
                     e.stopPropagation();
                     e.preventDefault();
+                    e.target.classList.remove('active');
                     dispatch('dropfile', e)
                 },
             }, [
                 span('.material-icons.uploadIco', 'cloud_upload'),
-                span({},'Drag files here or', [
-                    label({}, 'browse for files', [
+                span({}, [
+                    'Drag files here or',
+                    label({}, [
+                        'browse for files',
                         input(
                             {
-                                value: 'browse',
                                 type: 'file',
-                                // style: 'display:none',
+                                style: 'display:none',
                                 multiple: true,
                                 onchange: (e)=> dispatch('manualSelect', e)
                             }
@@ -138,8 +139,7 @@ function buildFileTypeOpts(model, file) {
 }
 
 function queueCont(dispatch, model) {
-    // console.log('queuecont model', model);
-    return div('#queue.container', {style: `display:${!model.isSubmitting ? 'block':'none'}`},model.files.map( file =>
+    return div('#queue.container', {style: `display:${!model.isSubmitting ? 'block':'none'}`}, model.files.map( file =>
             div('.row', buildQueueCols(model, file, dispatch))
         ));
 } // queueCont

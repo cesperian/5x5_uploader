@@ -75,7 +75,6 @@ const querystring = require('querystring');
             headers: {'Content-Type': 'multipart/form-data'},
             data: fd,
             onUploadProgress: (e) => {
-                // console.log('prog',e);
                 let pos = e.loaded || e.position;
                 if (e.lengthComputable){
                     model.submitProgress = Math.ceil(pos / e.total * 100 );
@@ -93,7 +92,6 @@ const querystring = require('querystring');
     }
 
     function updateType(model, e){
-        // console.log('selCh', e);
         const name = e.target.attributes['name'].value;
         const val = e.target.value;
         model.files.map(f => {
@@ -124,7 +122,6 @@ const querystring = require('querystring');
             return model;
         }
         for (let i =0; i < fl.length; i++) {
-            // console.log('sizeFl', fl[i]);
             if (fl[i].size > (model.sizeLimit * 1048576)) {
                 model.alertMessages.push(`The size limit for individual files is ${model.sizeLimit} MB.`);
                 model.alertMessages.push(`${fl[i].name} is ${(fl[i].size/1048576).toFixed(1)} MB`);
@@ -133,41 +130,33 @@ const querystring = require('querystring');
                 model.files.push(fl[i]);
             }
         }
-        // console.log('model', model);
         return model;
     }
 
-    // impure function block...
-    // todo; why does updatemodel need to be passed in as an arg? Cant be just called from dispatch?
-    function app(initModel, updateModel, view, node) {
+    function app(initModel, view, node) {
         const config = JSON.parse(node.querySelector('#config').innerHTML);
         let model = {...initModel, ...config};
         if (model.showDescription) File.prototype.description = '';
         if (model.selectOpts) File.prototype.fileType = '';
 
-        // send dispatch as arg so can be specified in events created in view fn..
         // for initial view..
         let currentView = view(dispatch, model);
         let rootNode = createElement(currentView);
         node.appendChild(rootNode);
-        // node.appendChild(currentView);
 
         // ...and updated view (dispatch nested here to isolate side effects) ...
         function dispatch(msg, e) {
             model = updateModel(msg, model, e, dispatch);
-            // console.log('dispatch model', model);
-            // console.log('dispatch e', e);
             const updatedView = view(dispatch, model);
             const patches = diff(currentView, updatedView);
             rootNode = patch(rootNode, patches);
-            // node.replaceChild(updatedView, currentView);
             currentView = updatedView;
         }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         const rootNode = document.querySelector('#uploader');
-        app(initModel, updateModel, view, rootNode);
+        app(initModel, view, rootNode);
     });
 
 }());
