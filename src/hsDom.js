@@ -1,14 +1,22 @@
 import hh from 'hyperscript-helpers';
 import { h } from 'virtual-dom';
+import {
+    setTypeMSG,
+    setDescMSG,
+    addFilesMSG,
+    removeFileMSG,
+    clearAlertsMSG
+} from "./update";
 
 const {div, span, img, label, input, select, option, br, button, p, b} = hh(h);
 
 export default function ddDom(dispatch, model){
 
+    // yuck
     if(model.alertMessages.length) {
         setTimeout(() => {
             const el = document.querySelector('#modal1');
-            const modal = M.Modal.init(el);
+            const modal = M.Modal.init(el, {onCloseEnd: () => dispatch(clearAlertsMSG)});
             modal.open();
         }, 50);
     }
@@ -18,7 +26,7 @@ export default function ddDom(dispatch, model){
         ddCont(dispatch, model),
         queueCont(dispatch, model),
         submitCont(dispatch, model),
-        modal(model)
+        modal(dispatch, model)
     ]);
 }
 
@@ -34,11 +42,14 @@ function progressCont(model) {
     ]);
 }
 
-function modal(model){
+function modal(dispatch, model){
     return div('#modal1.modal', [
         div('.modal-content', model.alertMessages.map(m => p(m))),
         div('.modal-footer', [
-            button('.modal-close.waves-effect.waves-green.btn-flat', 'Close')
+            button(
+                '.modal-close.waves-effect.waves-green.btn-flat',
+                'Close'
+            )
         ])
     ]);
 }
@@ -61,7 +72,7 @@ function ddCont(dispatch, model){
                     e.stopPropagation();
                     e.preventDefault();
                     e.target.classList.remove('active');
-                    dispatch('dropfile', e)
+                    dispatch(addFilesMSG(e.dataTransfer.files))
                 },
             }, [
                 span('.material-icons.uploadIco', 'cloud_upload'),
@@ -74,7 +85,7 @@ function ddCont(dispatch, model){
                                 type: 'file',
                                 style: 'display:none',
                                 multiple: true,
-                                onchange: (e)=> dispatch('manualSelect', e)
+                                onchange: (e)=> dispatch(addFilesMSG(e.srcElement.files))
                             }
                         )
                     ])
@@ -96,9 +107,8 @@ function buildQueueCols(model, file, dispatch) {
                 type: 'text',
                 placeholder: 'Description of file',
                 maxLength: '100',
-                name: file.name,
                 value: file.description,
-                onchange: (e) => dispatch('updateDesc', e)
+                onchange: (e) => dispatch(setDescMSG(e.target.value, file.name))
             }),
         ])
     );
@@ -106,9 +116,8 @@ function buildQueueCols(model, file, dispatch) {
         div('.col.s3.options.valign-wrapper', [
             select({
                 style: 'display:inline-block',
-                name: file.name,
                 value: file.fileType,
-                onchange: (e) => dispatch('updateType', e)
+                onchange: (e) => dispatch(setTypeMSG(e.target.value, file.name))
             }, buildFileTypeOpts(model, file))
         ])
     );
@@ -116,24 +125,26 @@ function buildQueueCols(model, file, dispatch) {
         div('.col.s3.remove.valign-wrapper', [
             button(
                 '.btn.btn-small.waves-effect.waves-light.red',
-                {
-                    name: file.name,
-                    onclick: (e) => dispatch('remove', e)
-                },
+                {onclick: (e) => dispatch(removeFileMSG(file.name))},
                 'remove')
         ])
     );
     return row;
 }
 
+// todo; get rid of all .push() methods, use R 'append', etc and keep vars immutable
+//  replace 'let's w const where possible
 function buildFileTypeOpts(model, file) {
-    let defaultOpt = {value: '', disabled: 'disabled'};
-    if(!file.fileType) defaultOpt = {selected: 'selected', ...defaultOpt};
-    let options = [option(defaultOpt, 'Select this file type')];
+    let options = [option({
+        value: '',
+        disabled: 'disabled',
+        selected: !file.fileType
+        }, 'Select this file type')];
     Object.keys(model.selectOpts).forEach( key => {
-        let optionTemplate = {value: key};
-        if(file.fileType == key) optionTemplate = {selected: 'selected', ...optionTemplate};
-        options.push(option(optionTemplate, model.selectOpts[key]));
+        options.push(option({
+            value: key,
+            selected: file.fileType == key
+        }, model.selectOpts[key]));
     });
     return options;
 }
