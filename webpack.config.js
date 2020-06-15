@@ -18,7 +18,7 @@ module.exports = {
         ]
     },
     externals: {
-        'materialize-css': 'materialize-css',
+        // 'materialize-css': 'materialize-css',
         // 'virtual-dom': 'virtual-dom',
         // 'hyperscript-helpers': 'hyperscript-helpers'
     }

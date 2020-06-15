@@ -5,7 +5,7 @@ import {
     setDescMSG,
     addFilesMSG,
     removeFileMSG,
-    clearAlertsMSG
+    httpSubmitMsg
 } from "./update";
 
 const {div, span, img, label, input, select, option, br, button, p, b} = hh(h);
@@ -13,13 +13,13 @@ const {div, span, img, label, input, select, option, br, button, p, b} = hh(h);
 export default function ddDom(dispatch, model){
 
     // yuck
-    if(model.alertMessages.length) {
-        setTimeout(() => {
-            const el = document.querySelector('#modal1');
-            const modal = M.Modal.init(el, {onCloseEnd: () => dispatch(clearAlertsMSG)});
-            modal.open();
-        }, 50);
-    }
+    // if(model.alertMessages.length) {
+    //     setTimeout(() => {
+    //         const el = document.querySelector('#modal1');
+    //         const modal = M.Modal.init(el, {onCloseEnd: () => dispatch(clearAlertsMSG)});
+    //         modal.open();
+    //     }, 50);
+    // }
 
     return div('#uploaderCont', [
         progressCont(model),
@@ -161,7 +161,7 @@ function submitCont(dispatch, model) {
             div('.col.s12.right-align', [
                 button(
                     '.btn.waves-effect.waves-light.blue',
-                    {onclick: (e) => dispatch('submit')},
+                    {onclick: (e) => dispatch(httpSubmitMsg)},
                     'Upload')
             ])
         ])
