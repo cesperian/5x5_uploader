@@ -5,21 +5,13 @@ import {
     setDescMSG,
     addFilesMSG,
     removeFileMSG,
-    httpSubmitMsg
+    httpSubmitMsg,
+    activeDropMSG
 } from "./update";
 
-const {div, span, img, label, input, select, option, br, button, p, b} = hh(h);
+const {div, span, img, label, input, select, option, br, button, p} = hh(h);
 
 export default function ddDom(dispatch, model){
-
-    // yuck
-    // if(model.alertMessages.length) {
-    //     setTimeout(() => {
-    //         const el = document.querySelector('#modal1');
-    //         const modal = M.Modal.init(el, {onCloseEnd: () => dispatch(clearAlertsMSG)});
-    //         modal.open();
-    //     }, 50);
-    // }
 
     return div('#uploaderCont', [
         progressCont(model),
@@ -57,23 +49,11 @@ function modal(dispatch, model){
 function ddCont(dispatch, model){
     return div('#ddArea.container', {style: `opacity:${model.isSubmitting ? '0':'100'}`}, [
         div('.row.ddHandler', [
-            div('#dragandrophandler.col.s12.valign-wrapper', {
-                ondragenter: (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    e.target.classList.add('active');
-                },
-                ondragover: (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                },
-                ondragleave: (e) => e.target.classList.remove('active'),
-                ondrop: (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    e.target.classList.remove('active');
-                    dispatch(addFilesMSG(e.dataTransfer.files))
-                },
+            div(`#dragandrophandler.col.s12.valign-wrapper${model.dropAreaActive ? '.active' : ''}`, {
+                ondragenter: (e) => dispatch(activeDropMSG(true, e)),
+                ondragover: (e) => dispatch(activeDropMSG(true, e)),
+                ondragleave: (e) => dispatch(activeDropMSG(false, e)),
+                ondrop: (e) => dispatch(addFilesMSG(e.dataTransfer.files, e))
             }, [
                 span('.material-icons.uploadIco', 'cloud_upload'),
                 span({}, [
@@ -85,7 +65,7 @@ function ddCont(dispatch, model){
                                 type: 'file',
                                 style: 'display:none',
                                 multiple: true,
-                                onchange: (e)=> dispatch(addFilesMSG(e.srcElement.files))
+                                onchange: (e)=> dispatch(addFilesMSG(e.srcElement.files, e))
                             }
                         )
                     ])
@@ -96,13 +76,11 @@ function ddCont(dispatch, model){
 }
 
 function buildQueueCols(model, file, dispatch) {
-    let row = [
-        div('.col.s3.name.valign-wrapper', [
+    const nameCol = div(`.col.s${model.selectOpts || model.showDescription ? '3' : '9'}.name.valign-wrapper`, [
             span('.truncate', file.name)
-        ])
-    ];
-    if (model.showDescription) row.push(
-        div('.col.s3.desc.valign-wrapper', [
+        ]);
+    const descCol = model.showDescription ?
+        div(`.col.s${model.selectOpts ? '3' : '6'}.desc.valign-wrapper`, [
             input({
                 type: 'text',
                 placeholder: 'Description of file',
@@ -110,50 +88,44 @@ function buildQueueCols(model, file, dispatch) {
                 value: file.description,
                 onchange: (e) => dispatch(setDescMSG(e.target.value, file.name))
             }),
-        ])
-    );
-    if (model.selectOpts) row.push(
-        div('.col.s3.options.valign-wrapper', [
+        ]) : null;
+    const typeCol = model.selectOpts ?
+        div(`.col.s${model.showDescription ? '3' : '6'}.options.valign-wrapper`, [
             select({
                 style: 'display:inline-block',
                 value: file.fileType,
                 onchange: (e) => dispatch(setTypeMSG(e.target.value, file.name))
             }, buildFileTypeOpts(model, file))
-        ])
-    );
-    row.push(
-        div('.col.s3.remove.valign-wrapper', [
+        ]) : null;
+    const removeCol = div('.col.s3.remove.valign-wrapper', [
             button(
                 '.btn.btn-small.waves-effect.waves-light.red',
                 {onclick: (e) => dispatch(removeFileMSG(file.name))},
                 'remove')
-        ])
-    );
-    return row;
+        ]);
+    return [nameCol, descCol, typeCol, removeCol];
 }
 
-// todo; get rid of all .push() methods, use R 'append', etc and keep vars immutable
-//  replace 'let's w const where possible
 function buildFileTypeOpts(model, file) {
-    let options = [option({
+    const defaultOption = option({
         value: '',
         disabled: 'disabled',
         selected: !file.fileType
-        }, 'Select this file type')];
-    Object.keys(model.selectOpts).forEach( key => {
-        options.push(option({
+        }, 'Select this file type');
+    const options = Object.keys(model.selectOpts).map(key => {
+        return option({
             value: key,
             selected: file.fileType == key
-        }, model.selectOpts[key]));
+        }, model.selectOpts[key]);
     });
-    return options;
+    return [defaultOption, ...options];
 }
 
 function queueCont(dispatch, model) {
     return div('#queue.container', {style: `display:${!model.isSubmitting ? 'block':'none'}`}, model.files.map( file =>
             div('.row', buildQueueCols(model, file, dispatch))
         ));
-} // queueCont
+}
 
 function submitCont(dispatch, model) {
     const submitDom = div('#submit.container', {style: `display:${!model.isSubmitting ? 'block':'none'}`},[

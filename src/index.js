@@ -18,6 +18,7 @@ const initModel = {
     alertMessages: [],
     isSubmitting: false,
     submitProgress: 0,
+    dropAreaActive: false
 };
 
 window.addEventListener('DOMContentLoaded', () => {

@@ -17,22 +17,25 @@ function app(initModel, view, node, updateModel) {
     let rootNode = createElement(currentView);
     node.appendChild(rootNode);
 
-    // ...and updated view (dispatch nested here to isolate side effects) ...
+    // ...and updated view (dispatch nested here to isolate data mutation) ...
     function dispatch(msg) {
-        const [updatedModel, cmd] = updateModel(msg, model);
+        const [updatedModel, SFx] = updateModel(msg, model);
         model = updatedModel;
-        if(cmd) runSideEffects(cmd, dispatch, model);
+        if(SFx) SFx.cmds.forEach(cmd => runSideEffects(cmd, dispatch, model));
         const updatedView = view(dispatch, model);
         const patches = diff(currentView, updatedView);
         rootNode = patch(rootNode, patches);
         currentView = updatedView;
-        // console.log('model', model);
-        // if(cmd)console.log('cmd', cmd.seType);
     }
 }
-
+// if issuing a get req, can send in curried fn in cmd that contains a ref to whatever property that should be updated by it
 function runSideEffects(cmd, dispatch, model) {
     switch (cmd.seType) {
+        case SETYPE.STOP_EVENT: {
+            cmd.event.stopPropagation();
+            cmd.event.preventDefault();
+            break;
+        }
         case SETYPE.INIT_POST: {
             let fd = new FormData();
             model.files.forEach(f => {
