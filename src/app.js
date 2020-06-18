@@ -1,8 +1,10 @@
 
+// uncomment if building w/o materialize cdn...
+import * as M from "materialize-css";
+
 import { diff, patch } from 'virtual-dom';
 import createElement from 'virtual-dom/create-element';
 import {SETYPE, httpProgressMSG, httpResponseMSG, clearAlertsMSG} from "./update";
-import * as M from "materialize-css";
 const axios = require('axios').default;
 const querystring = require('querystring');
 

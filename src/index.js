@@ -1,8 +1,8 @@
 
+// uncomment if building w/o materialize cdn...
 import 'materialize-css/dist/css/materialize.css';
-import 'materialize-css/dist/js/materialize.js';
-import './ul.scss';
 
+import './ul.scss';
 import updateModel from './update'; // data model -> updated data model
 import view from './hsDom'; // xform data model -> html+css
 import app from './app';

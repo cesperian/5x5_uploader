@@ -1,15 +1,25 @@
 # 5x5_uploader
 
-Can be used to instantly create a dropfile area and file queue with very little setup.
+A Javascript uploader that creates a dropfile area, file queue, and optional input elements with very little setup.
 
 Uses Materialize for responsive layout and alerts.
 
-Demo page can be found [here](https://cesperian.github.io/5x5_uploader/example/index.html).
+Demo page can be found [here](https://cesperian.github.io/5x5_uploader/example/example.html).
+
+An alternate uploader with the same functionality but written as a jQuery plug in using Bootstrap can be found [here](https://github.com/cesperian/5x5_jq_uploader).
+
 ## Installation
 
+Using npm;
 
 ```
-$ npm install 5x5_uploader
+$ npm install 5x5_uploader materialize-css@next
+```
+Using a cdn;
+```
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="5x5_uploader.min.js"></script>
 ```
 
 ## Basic Setup

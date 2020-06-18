@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-    mode: "development",
+    mode: "production",
     output: {
         path: path.resolve(__dirname, "dist"),
         filename: "5x5_uploader.min.js"
@@ -18,8 +18,6 @@ module.exports = {
         ]
     },
     externals: {
-        // 'materialize-css': 'materialize-css',
-        // 'virtual-dom': 'virtual-dom',
-        // 'hyperscript-helpers': 'hyperscript-helpers'
+        'materialize-css': 'materialize-css',
     }
 };
