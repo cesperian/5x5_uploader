@@ -35,6 +35,7 @@ testem.log
 /example
 webpack.config.js
 /src
+/refProjWithPackage
 
 # System Files
 .DS_Store
