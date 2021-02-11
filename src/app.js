@@ -1,6 +1,6 @@
 
 // uncomment if building w/o materialize cdn...
-import * as M from "materialize-css";
+// import * as M from "materialize-css";
 
 import { diff, patch } from 'virtual-dom';
 import createElement from 'virtual-dom/create-element';
