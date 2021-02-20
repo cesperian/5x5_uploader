@@ -1,6 +1,6 @@
 {
   "name": "5x5_uploader",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A non-jQuery file uploader that uses Materialize for layout and alerts.",
   "main": "dist/5x5_uploader.min.js",
   "scripts": {
