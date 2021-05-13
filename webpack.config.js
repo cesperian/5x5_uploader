@@ -1,4 +1,5 @@
 const path = require('path');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
     mode: "production",
@@ -11,6 +12,9 @@ module.exports = {
             "querystring": require.resolve("querystring-es3")
         }
     },
+    plugins: [
+        // new BundleAnalyzerPlugin()
+    ],
     node: {
         // fs: "empty" //https://github.com/pugjs/pug-loader/issues/8
     },
